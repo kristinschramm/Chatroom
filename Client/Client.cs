@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Client
 {
+    // DOMS TEST
     class Client
     {
         TcpClient clientSocket;
