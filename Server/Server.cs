@@ -12,12 +12,16 @@ namespace Server
 {
     class Server
     {
-        Client client1;
+        Dictionary<string, Client> addressBook = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance 
+        addressBook.add("IPA" ,Client client1);
+       
         Client client2;
         Client client3;
-        List<Client> clients = new List<Client>();        
 
-        
+        List<Client> clients = new List<Client>();
+
+
+
         TcpListener server;
         public Server()
         {
