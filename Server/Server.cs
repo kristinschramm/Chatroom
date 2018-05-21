@@ -15,7 +15,7 @@ namespace Server
       //  Dictionary<string, Client> addressBook = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance 
         //addressBook.add("IPA" ,Client client1);
 
-        Client client1;
+        Client client;
         Client client2;
         Client client3;
         Queue<Message> messageQueue = new Queue<Message>();
@@ -35,47 +35,55 @@ namespace Server
             Parallel.Invoke(
                 () =>
                 {
-                    AcceptClient();
+                    while (true)
+                    {
+                        AcceptClient();
+                    }
                 },
                 () =>
                 {
-                    DisplayMessage();
+                    while (true)
+                    {
+                        DisplayMessage();
+                    }
                 },
                 ()=>
                 {
-                    ReceiveMessage();
+                    while (true)
+                    {
+                        ReceiveMessage();
+                    }
                 })
                 ;
             
         }
         private void AcceptClient()
         {
-            for (int i = 0; i < clients.Count; i++)//this was changed from zip just put in loop
-            {
                 TcpClient clientSocket = default(TcpClient);
                 clientSocket = server.AcceptTcpClient();
-                Console.WriteLine($"Connected Client {i}"); //this was changed from zip changed from just connected
+                Console.WriteLine($"Connected Client {client.UserId}"); //this was changed from zip changed from just connected
                 NetworkStream stream = clientSocket.GetStream();
-                clients[i] = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
-            }
+                client = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
+            
 
-            }
+        }
 
         private void DisplayMessage()
         {
             if (messageQueue.Count > 0)
             {
                 Message message = messageQueue.Dequeue();
-               string body=  message.Body;
-                Respond(body);
+                string body=  message.Body;
+                string senderName = message.UserId;
+                Respond(senderName + ": " + body);
             }
         }
-        private void Respond(string body) //this was changed from zip added parameter
+        private void Respond(String message) //this was changed from zip added parameter
 
         {
             foreach (Client client in clients)
             {
-                client.Send(body);
+                client.Send(message);
             }
 
         }
@@ -87,7 +95,7 @@ namespace Server
                 string body = client.Recieve();
                 Message message = new Message(client, body);
                 messageQueue.Enqueue(message);
-            }///rewrite
+            }// rewrite when dictionary get saved
         }
         
 
