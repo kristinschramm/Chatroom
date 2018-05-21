@@ -15,30 +15,47 @@ namespace Server
         Dictionary<string, Client> acceptedClients = new Dictionary<string, Client>();
         Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
 
+        Queue<Message> messageQueue = new Queue<Message>();
+
 
         TcpListener server;
         public Server(Client client)
         {
-            server = new TcpListener(IPAddress.Parse("192.168.0.127"), 8888);
+            server = new TcpListener(IPAddress.Parse("192.168.0.146"), 8888);
             server.Start();
         }
         public void Run()
         {
-            AcceptClient();
-            string message1 = clients[0].Recieve();//this was changed from zip
+            
+            Parallel.Invoke(
+                 () =>
+                 {           
+              while (true)
+                   {
+                       AcceptClient();
+                  }
+},
+                 () =>
+                 {
+                    
+                    while (true)
+                    {
+                        DisplayMessage();
+                    }
+                 },
+                 ()=>
+                 {
+                    
+                    while (true)
+                    {
+                        ReceiveMessage();
+                    }
+                 })
+                 ;
+             
+         }
 
-
-            Respond(message1, clients[0]);//this was changed from zip
-            Queue<string> queue = new Queue<string>();
-            string message = queue.First();
-             string message2 = clients[1].Recieve();//this was changed from zip
-
-
-            string message3 = clients[2].Recieve();//this was changed from zip
-
-
-
-        }
+        
         private void AcceptClient()
         {
             for (int i = 0; i < onlineClients.Count; i++)//this was changed from zip just put in loop
@@ -52,11 +69,27 @@ namespace Server
             }
 
             }
-       
-        private void Respond(string body, Client client) //this was changed from zip added parameter 
+        private void DisplayMessage()
         {
-             client.Send(body);
+            if (messageQueue.Count > 0)
+            {
+                Message message = messageQueue.Dequeue();
+                string body = message.Body;
+                string senderName = message.UserId;
+                Respond(senderName + ": " + body);
+            }
         }
+
+        private void Respond(String message) //this was changed from zip added parameter
+
+        {
+            foreach (Client client in acceptedClients.Values)
+            {
+                client.Send(message);
+            }
+
+        }
+
 
         private void CheckForNewClient(Client client)
         {
@@ -71,6 +104,15 @@ namespace Server
                     acceptedClients.Add(client.UserId, client);
                 }
             }
+        }
+        private void ReceiveMessage()
+        {
+            foreach (Client client in acceptedClients.Values)
+            {
+                string body = client.Recieve();
+                Message message = new Message(client, body);
+                messageQueue.Enqueue(message);
+            }// rewrite when dictionary get saved
         }
 
     }
