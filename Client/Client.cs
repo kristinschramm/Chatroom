@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    // DOMS TEST
+    // add adress book here 
+    // clients will need method to add member to this adress book
     class Client
     {
         TcpClient clientSocket;

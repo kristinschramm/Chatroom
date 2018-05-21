@@ -12,92 +12,66 @@ namespace Server
 {
     class Server
     {
-      //  Dictionary<string, Client> addressBook = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance 
-        //addressBook.add("IPA" ,Client client1);
-
-        Client client;
-        Client client2;
-        Client client3;
-        Queue<Message> messageQueue = new Queue<Message>();
-
-        List<Client> clients = new List<Client>();
-
+        Dictionary<string, Client> acceptedClients = new Dictionary<string, Client>();
+        Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
 
 
         TcpListener server;
-        public Server()
+        public Server(Client client)
         {
-            server = new TcpListener(IPAddress.Parse("192.168.0.130"), 8888);
+            server = new TcpListener(IPAddress.Parse("192.168.0.127"), 8888);
             server.Start();
         }
         public void Run()
         {
-            Parallel.Invoke(
-                () =>
-                {
-                    while (true)
-                    {
-                        AcceptClient();
-                    }
-                },
-                () =>
-                {
-                    while (true)
-                    {
-                        DisplayMessage();
-                    }
-                },
-                ()=>
-                {
-                    while (true)
-                    {
-                        ReceiveMessage();
-                    }
-                })
-                ;
-            
+            AcceptClient();
+            string message1 = clients[0].Recieve();//this was changed from zip
+
+
+            Respond(message1, clients[0]);//this was changed from zip
+            Queue<string> queue = new Queue<string>();
+            string message = queue.First();
+             string message2 = clients[1].Recieve();//this was changed from zip
+
+
+            string message3 = clients[2].Recieve();//this was changed from zip
+
+
+
         }
         private void AcceptClient()
         {
+            for (int i = 0; i < onlineClients.Count; i++)//this was changed from zip just put in loop
+            {
                 TcpClient clientSocket = default(TcpClient);
                 clientSocket = server.AcceptTcpClient();
-                Console.WriteLine($"Connected Client {client.UserId}"); //this was changed from zip changed from just connected
+                Console.WriteLine($"Connected Client {i}"); //this was changed from zip changed from just connected
                 NetworkStream stream = clientSocket.GetStream();
-                client = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
-            
-
-        }
-
-        private void DisplayMessage()
-        {
-            if (messageQueue.Count > 0)
-            {
-                Message message = messageQueue.Dequeue();
-                string body=  message.Body;
-                string senderName = message.UserId;
-                Respond(senderName + ": " + body);
-            }
-        }
-        private void Respond(String message) //this was changed from zip added parameter
-
-        {
-            foreach (Client client in clients)
-            {
-                client.Send(message);
+                Client newClient = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
+                CheckForNewClient(newClient);
             }
 
+            }
+       
+        private void Respond(string body, Client client) //this was changed from zip added parameter 
+        {
+             client.Send(body);
         }
 
-        private void ReceiveMessage()
+        private void CheckForNewClient(Client client)
         {
-            foreach (Client client in clients)
+            foreach (string key in acceptedClients.Keys)
             {
-                string body = client.Recieve();
-                Message message = new Message(client, body);
-                messageQueue.Enqueue(message);
-            }// rewrite when dictionary get saved
+                if (acceptedClients.Keys.Equals(client.UserId))
+                {
+                    onlineClients.Add(client.UserId, client);
+                }
+                else
+                {
+                    acceptedClients.Add(client.UserId, client);
+                }
+            }
         }
-        
 
     }
 }
