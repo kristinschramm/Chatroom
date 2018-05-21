@@ -11,3 +11,4 @@ namespace Server
          void Log(string message);
     }
 }
+                              

@@ -12,11 +12,13 @@ namespace Server
 {
     class Server
     {
-        Dictionary<string, Client> addressBook = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance 
-        addressBook.add("IPA" ,Client client1);
-       
+      //  Dictionary<string, Client> addressBook = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance 
+        //addressBook.add("IPA" ,Client client1);
+
+        Client client1;
         Client client2;
         Client client3;
+        Queue<Message> messageQueue = new Queue<Message>();
 
         List<Client> clients = new List<Client>();
 
@@ -25,28 +27,26 @@ namespace Server
         TcpListener server;
         public Server()
         {
-            server = new TcpListener(IPAddress.Parse("192.168.0.127"), 8888);
+            server = new TcpListener(IPAddress.Parse("192.168.0.130"), 8888);
             server.Start();
         }
         public void Run()
         {
-            clients.Add(client1); //this was changed from zip
-            clients.Add(client2);//this was changed from zip
-            clients.Add(client3);//this was changed from zip
-            AcceptClient();
-            string message1 = clients[0].Recieve();//this was changed from zip
-
-
-            Respond(message1, clients[0]);//this was changed from zip
-            Queue<string> queue = new Queue<string>();
-            string message = queue.First();
-             string message2 = clients[1].Recieve();//this was changed from zip
-
-
-            string message3 = clients[2].Recieve();//this was changed from zip
-
-
-
+            Parallel.Invoke(
+                () =>
+                {
+                    AcceptClient();
+                },
+                () =>
+                {
+                    DisplayMessage();
+                },
+                ()=>
+                {
+                    ReceiveMessage();
+                })
+                ;
+            
         }
         private void AcceptClient()
         {
@@ -60,12 +60,36 @@ namespace Server
             }
 
             }
-       
-        private void Respond(string body, Client client) //this was changed from zip added parameter
+
+        private void DisplayMessage()
+        {
+            if (messageQueue.Count > 0)
+            {
+                Message message = messageQueue.Dequeue();
+               string body=  message.Body;
+                Respond(body);
+            }
+        }
+        private void Respond(string body) //this was changed from zip added parameter
 
         {
-             client.Send(body);
+            foreach (Client client in clients)
+            {
+                client.Send(body);
+            }
+
+        }
+
+        private void ReceiveMessage()
+        {
+            foreach (Client client in clients)
+            {
+                string body = client.Recieve();
+                Message message = new Message(client, body);
+                messageQueue.Enqueue(message);
+            }///rewrite
         }
         
+
     }
 }

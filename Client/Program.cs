@@ -11,10 +11,9 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            Client client = new Client("192.168.0.127", 8888);//this was changed from zip Kristin's IP 8888 specific port
-            Task send = Task.Run(() => { client.Send(); }); //this was changed from zip added TASK was just client.Send
-            Task recieve = Task.Run(() => { client.Recieve(); });
-
+            Client client = new Client("192.168.0.130", 8888);//this was changed from zip Kristin's IP 8888 specific port
+            client.Send(); //this was changed from zip added TASK was just client.Send
+            client.Recieve(); 
             Console.ReadLine();
         }
     }
