@@ -12,26 +12,18 @@ namespace Server
 {
     class Server
     {
-        Dictionary<string, Client> acceptedClients = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance)
-        addressBook.add("IPA" ,Client client1);
-       
-        Client client2;
-        Client client3;
-
-
+        Dictionary<string, Client> acceptedClients = new Dictionary<string, Client>();
+        Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
 
 
         TcpListener server;
-        public Server()
+        public Server(Client client)
         {
             server = new TcpListener(IPAddress.Parse("192.168.0.127"), 8888);
             server.Start();
         }
         public void Run()
         {
-            clients.Add(client1); //this was changed from zip
-            clients.Add(client2);//this was changed from zip
-            clients.Add(client3);//this was changed from zip
             AcceptClient();
             string message1 = clients[0].Recieve();//this was changed from zip
 
@@ -49,22 +41,37 @@ namespace Server
         }
         private void AcceptClient()
         {
-            for (int i = 0; i < clients.Count; i++)//this was changed from zip just put in loop
+            for (int i = 0; i < onlineClients.Count; i++)//this was changed from zip just put in loop
             {
                 TcpClient clientSocket = default(TcpClient);
                 clientSocket = server.AcceptTcpClient();
                 Console.WriteLine($"Connected Client {i}"); //this was changed from zip changed from just connected
                 NetworkStream stream = clientSocket.GetStream();
-                clients[i] = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
+                Client newClient = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
+                CheckForNewClient(newClient);
             }
 
             }
        
-        private void Respond(string body, Client client) //this was changed from zip added parameter
-
+        private void Respond(string body, Client client) //this was changed from zip added parameter 
         {
              client.Send(body);
         }
-        
+
+        private void CheckForNewClient(Client client)
+        {
+            foreach (string key in acceptedClients.Keys)
+            {
+                if (acceptedClients.Keys.Equals(client.UserId))
+                {
+                    onlineClients.Add(client.UserId, client);
+                }
+                else
+                {
+                    acceptedClients.Add(client.UserId, client);
+                }
+            }
+        }
+
     }
 }

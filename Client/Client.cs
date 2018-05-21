@@ -14,11 +14,14 @@ namespace Client
     {
         TcpClient clientSocket;
         NetworkStream stream;
+        public string userName;
         public Client(string IP, int port)
         {
+            this.userName=CreateUser();
             clientSocket = new TcpClient();
             clientSocket.Connect(IPAddress.Parse(IP), port);
             stream = clientSocket.GetStream();
+            
         }
         public void Send()
         {
@@ -31,6 +34,12 @@ namespace Client
             byte[] recievedMessage = new byte[256];
             stream.Read(recievedMessage, 0, recievedMessage.Length);
             UI.DisplayMessage(Encoding.ASCII.GetString(recievedMessage));
+            
+        }
+        public string CreateUser()
+        {
+            UI.DisplayMessage("Please enter a user name.");
+            return userName = UI.GetInput();
         }
     }
 }

@@ -9,14 +9,20 @@ namespace Server
     class Chatroom
     {
         // member variables
+        // queue for messages
+
 
         
         //constructor
         public Chatroom()
         {
             //filepath for log 
+
         }
 
         //member methods
+
+        // method to push queue to each member of chatroom
+
     }
 }
