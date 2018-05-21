@@ -12,13 +12,12 @@ namespace Server
 {
     class Server
     {
-        Dictionary<string, Client> addressBook = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance 
+        Dictionary<string, Client> acceptedClients = new Dictionary<string, Client>();      //(key = IPAddress, value = Client instance)
         addressBook.add("IPA" ,Client client1);
        
         Client client2;
         Client client3;
 
-        List<Client> clients = new List<Client>();
 
 
 
