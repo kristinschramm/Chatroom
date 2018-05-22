@@ -12,7 +12,7 @@ namespace Server
 {
     class Server
     {
-        Dictionary<string, Client> acceptedClients = new Dictionary<string, Client>();
+        Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>();
         Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
 
         Queue<Message> messageQueue = new Queue<Message>();
@@ -58,9 +58,9 @@ namespace Server
                 
                 TcpClient clientSocket = default(TcpClient);
                 clientSocket = server.AcceptTcpClient();
-                Console.WriteLine($"Connected Client"); //this was changed from zip changed from just connected
+                Console.WriteLine($"Connected Client");                //this was changed from zip changed from just connected
                 NetworkStream stream = clientSocket.GetStream();
-                client = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
+                client = new Client(stream, clientSocket, acceptedClients.Count); //this was changed from zip changed client to clients list
                 AddNewClient(client);
                 client = null;
                                                                        
@@ -76,7 +76,7 @@ namespace Server
             }
         }
 
-        private void Respond(String message) //this was changed from zip added parameter
+        private void Respond(String message)
 
         {
             foreach (Client client in acceptedClients.Values)
@@ -89,7 +89,9 @@ namespace Server
 
         private void AddNewClient(Client client)
         {
-            acceptedClients.Add(client.UserId, client);                
+            acceptedClients.Add((acceptedClients.Count + 1), client);
+            Message message = new Message(client, $"{client.UserId} Connected");
+            messageQueue.Enqueue(message);
             
         }
         private void ReceiveMessage()
