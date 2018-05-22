@@ -15,6 +15,7 @@ namespace Client
         TcpClient clientSocket;
         NetworkStream stream;
         public string userName;
+
         public Client(string IP, int port)
         {
             //this.userName=CreateUser();

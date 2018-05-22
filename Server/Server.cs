@@ -12,9 +12,10 @@ namespace Server
 {
     class Server
     {
-        Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>();
-        Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
-
+        //Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>();
+        //Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
+        List<Client> acceptedClientsList = new List<Client>();
+        
         Queue<Message> messageQueue = new Queue<Message>();
         Client client;
 
@@ -26,7 +27,6 @@ namespace Server
         }
         public void Run()
         {
-
             Parallel.Invoke(() =>
             {
                 while (true)
@@ -45,24 +45,25 @@ namespace Server
             {
                 while (true)
                 {
-                    ReceiveMessage();
+                    GetMessageFromClient();
                 }
+
             })
             ;
 
         }
 
 
-        private void AcceptClient()
+        public void AcceptClient()
         {
                 
-                TcpClient clientSocket = default(TcpClient);
-                clientSocket = server.AcceptTcpClient();
-                Console.WriteLine($"Connected Client");                //this was changed from zip changed from just connected
-                NetworkStream stream = clientSocket.GetStream();
-                client = new Client(stream, clientSocket, acceptedClients.Count); //this was changed from zip changed client to clients list
-                AddNewClient(client);
-                client = null;
+            TcpClient clientSocket = default(TcpClient);
+            clientSocket = server.AcceptTcpClient();
+            Console.WriteLine($"Connected Client");                //this was changed from zip changed from just connected
+            NetworkStream stream = clientSocket.GetStream();
+            client = new Client(stream, clientSocket, acceptedClientsList.Count); //this was changed from zip changed client to clients list
+            AddNewClient(client);
+            
                                                                        
         }
         private void DisplayMessage()
@@ -79,30 +80,80 @@ namespace Server
         private void Respond(String message)
 
         {
-            foreach (Client client in acceptedClients.Values)
+            
+            Parallel.Invoke(() =>
             {
-                client.Send(message);
-            }
+            
+               if (acceptedClientsList.Count > 0)
+               {
+                    acceptedClientsList[0].Send(message);
+               }
+           },
+           () =>
+           {
+               if (acceptedClientsList.Count > 1)
+               {
+                   acceptedClientsList[1].Send(message);
+               }
+           },
+           () =>
+           {
+               if (acceptedClientsList.Count > 2)
+               {
+                   acceptedClientsList[2].Send(message);
+               }
+           })
+           ;
+
 
         }
 
 
         private void AddNewClient(Client client)
         {
-            acceptedClients.Add((acceptedClients.Count + 1), client);
+            acceptedClientsList.Add(client);
             Message message = new Message(client, $"{client.UserId} Connected");
             messageQueue.Enqueue(message);
             
         }
-        private void ReceiveMessage()
+        public void AddMessageToQueue(Client client)
         {
-            foreach (Client client in acceptedClients.Values)
-            {
+            
                 string body = client.Recieve();
                 Message message = new Message(client, body);
                 messageQueue.Enqueue(message);
-            }// rewrite when dictionary get saved
+            
+            // rewrite when dictionary get saved
+            //write a parallel loop to continuously check for messages from each person
+        }
+        private void GetMessageFromClient()
+        {
+            Parallel.Invoke(() =>
+            {
+
+                if (acceptedClientsList.Count > 0)
+                {
+                    AddMessageToQueue(acceptedClientsList[0]);
+                }
+            },
+           () =>
+           {
+               if (acceptedClientsList.Count > 1)
+               {
+                   AddMessageToQueue(acceptedClientsList[1]);
+               }
+           },
+           () =>
+           {
+               if (acceptedClientsList.Count > 2)
+               {
+                   AddMessageToQueue(acceptedClientsList[2]);
+               }
+           })
+           ;
+
         }
 
+       
     }
 }
