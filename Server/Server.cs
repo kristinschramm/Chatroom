@@ -27,35 +27,32 @@ namespace Server
         public void Run()
         {
 
-            AcceptClient();
-           /// Parallel.Invoke(() =>
-//              {           
-//              while (true)
-//                   {
-//                       AcceptClient();
-//                  }
-//},
-//                 () =>
-//                 {
-                    
-//                    while (true)
-//                    {
-//                        DisplayMessage();
-//                    }
-//                 },
-//                 ()=>
-//                 {
-                    
-//                    while (true)
-//                    {
-//                        ReceiveMessage();
-//                    }
-//                 })
-//                 ;
-             
-         }
+            Parallel.Invoke(() =>
+            {
+                while (true)
+                {
+                    AcceptClient();
+                }
+            },
+            () =>
+            {
+                while (true)
+                {
+                    DisplayMessage();
+                }
+            },
+            () =>
+            {
+                while (true)
+                {
+                    ReceiveMessage();
+                }
+            })
+            ;
 
-        
+        }
+
+
         private void AcceptClient()
         {
                 
@@ -64,7 +61,7 @@ namespace Server
                 Console.WriteLine($"Connected Client"); //this was changed from zip changed from just connected
                 NetworkStream stream = clientSocket.GetStream();
                 client = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
-                CheckForNewClient(client);
+                AddNewClient(client);
                 client = null;
                                                                        
         }
@@ -90,19 +87,10 @@ namespace Server
         }
 
 
-        private void CheckForNewClient(Client client)
+        private void AddNewClient(Client client)
         {
-            foreach (string key in acceptedClients.Keys)
-            {
-                if (acceptedClients.Keys.Equals(client.UserId))
-                {
-                    onlineClients.Add(client.UserId, client);
-                }
-                else
-                {
-                    acceptedClients.Add(client.UserId, client);
-                }
-            }
+            acceptedClients.Add(client.UserId, client);                
+            
         }
         private void ReceiveMessage()
         {
