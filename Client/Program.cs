@@ -11,7 +11,7 @@ namespace Client
     {
         static void Main(string[] args)
         {
-            Client client = new Client("192.168.0.146", 8888);//this was changed from zip Kristin's IP 8888 specific port
+            Client client = new Client("192.168.0.146", 9999);//this was changed from zip Kristin's IP 8888 specific port
 
 
 

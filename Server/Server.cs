@@ -16,59 +16,58 @@ namespace Server
         Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
 
         Queue<Message> messageQueue = new Queue<Message>();
-
+        Client client;
 
         TcpListener server;
-        public Server(Client client)
+        public Server()
         {
-            server = new TcpListener(IPAddress.Parse("192.168.0.146"), 8888);
+            server = new TcpListener(IPAddress.Parse("192.168.0.146"), 9999);
             server.Start();
         }
         public void Run()
         {
-            
-            Parallel.Invoke(
-                 () =>
-                 {           
-              while (true)
-                   {
-                       AcceptClient();
-                  }
-},
-                 () =>
-                 {
+
+            AcceptClient();
+           /// Parallel.Invoke(() =>
+//              {           
+//              while (true)
+//                   {
+//                       AcceptClient();
+//                  }
+//},
+//                 () =>
+//                 {
                     
-                    while (true)
-                    {
-                        DisplayMessage();
-                    }
-                 },
-                 ()=>
-                 {
+//                    while (true)
+//                    {
+//                        DisplayMessage();
+//                    }
+//                 },
+//                 ()=>
+//                 {
                     
-                    while (true)
-                    {
-                        ReceiveMessage();
-                    }
-                 })
-                 ;
+//                    while (true)
+//                    {
+//                        ReceiveMessage();
+//                    }
+//                 })
+//                 ;
              
          }
 
         
         private void AcceptClient()
         {
-            for (int i = 0; i < onlineClients.Count; i++)//this was changed from zip just put in loop
-            {
+                
                 TcpClient clientSocket = default(TcpClient);
                 clientSocket = server.AcceptTcpClient();
-                Console.WriteLine($"Connected Client {i}"); //this was changed from zip changed from just connected
+                Console.WriteLine($"Connected Client"); //this was changed from zip changed from just connected
                 NetworkStream stream = clientSocket.GetStream();
-                Client newClient = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
-                CheckForNewClient(newClient);
-            }
-
-            }
+                client = new Client(stream, clientSocket); //this was changed from zip changed client to clients list
+                CheckForNewClient(client);
+                client = null;
+                                                                       
+        }
         private void DisplayMessage()
         {
             if (messageQueue.Count > 0)

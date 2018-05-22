@@ -17,7 +17,7 @@ namespace Client
         public string userName;
         public Client(string IP, int port)
         {
-            this.userName=CreateUser();
+            //this.userName=CreateUser();
             clientSocket = new TcpClient();
             clientSocket.Connect(IPAddress.Parse(IP), port);
             stream = clientSocket.GetStream();
