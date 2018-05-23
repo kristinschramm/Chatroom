@@ -51,8 +51,10 @@ namespace Server
                 }
             })
             ;
+
         }
-        
+
+
         public void AcceptClient()
         {                
             TcpClient clientSocket = default(TcpClient);
@@ -64,8 +66,13 @@ namespace Server
             AddNewClient(client);
             Thread ReceiveMessageFromClient = new Thread(new ThreadStart(client.Receive));
             ReceiveMessageFromClient.Start();
+<<<<<<< HEAD
             client = null;                                                                          
 
+=======
+            client = null;           
+                                                                       
+>>>>>>> parent of c56a196... formatting
         }
         private void DisplayMessage()    //chat room needs this 
         {
@@ -78,7 +85,8 @@ namespace Server
                     string senderName = message.UserId;
                     Respond(senderName + ": " + body);
                 }
-            }            
+            }
+            
         }
 
 
@@ -86,17 +94,11 @@ namespace Server
         private void Respond(String message)
 
         {
-            try
+            foreach (Client client in acceptedClients)
             {
-                foreach (Client client in acceptedClients)
-                {
-                    client.Send(message);
-                }
+                client.Send(message);
             }
-            catch (Exception)
-            {
-                //allows program to continue if client exits
-            }
+
         }
 
         private void AddNewClient(Client client)
@@ -122,6 +124,7 @@ namespace Server
             }
         }
 
+<<<<<<< HEAD
         private void DisplayChatRoom()
         {
             foreach (Chatroom chatroom in existingChatrooms)
@@ -157,6 +160,9 @@ namespace Server
                 //enter the chat room
             }
         }
+=======
+
+>>>>>>> parent of c56a196... formatting
     }
 }
 
