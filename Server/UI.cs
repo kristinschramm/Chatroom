@@ -15,7 +15,7 @@ namespace Server
         public static string GetInput()
         {
             return Console.ReadLine(); 
-            //test
+          
         }
     }
 }

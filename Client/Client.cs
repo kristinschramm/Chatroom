@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    // add adress book here 
-    // clients will need method to add member to this adress book
+   
     class Client
     {
         TcpClient clientSocket;
@@ -18,7 +17,6 @@ namespace Client
 
         public Client(string IP, int port)
         {
-            //this.userName=CreateUser();
             clientSocket = new TcpClient();
             clientSocket.Connect(IPAddress.Parse(IP), port);
             stream = clientSocket.GetStream();
@@ -37,10 +35,6 @@ namespace Client
             UI.DisplayMessage(Encoding.ASCII.GetString(recievedMessage));
             
         }
-        public string CreateUser()
-        {
-            UI.DisplayMessage("Please enter a user name.");
-            return userName = UI.GetInput();
-        }
+        
     }
 }

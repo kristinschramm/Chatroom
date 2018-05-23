@@ -13,13 +13,7 @@ namespace Server
 {
     class Server
     {
-        Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
-
-        List<Chatroom> existingChatrooms = new List<Chatroom>();
-        //index 0 should be an when used can create new chatroom 
-
-        //Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>(); //dictionary doesn't work 
-        List<Client> acceptedClients = new List<Client>();
+       List<Client> acceptedClients = new List<Client>();
         
 
         Queue<Message> messageQueue = new Queue<Message>();
@@ -66,15 +60,10 @@ namespace Server
             AddNewClient(client);
             Thread ReceiveMessageFromClient = new Thread(new ThreadStart(client.Receive));
             ReceiveMessageFromClient.Start();
-<<<<<<< HEAD
             client = null;                                                                          
 
-=======
-            client = null;           
-                                                                       
->>>>>>> parent of c56a196... formatting
         }
-        private void DisplayMessage()    //chat room needs this 
+        private void DisplayMessage()    
         {
             if (messageQueue.Count > 0)
             {
@@ -123,46 +112,6 @@ namespace Server
                 messageQueue.Enqueue(message);
             }
         }
-
-<<<<<<< HEAD
-        private void DisplayChatRoom()
-        {
-            foreach (Chatroom chatroom in existingChatrooms)
-            {
-                Console.WriteLine(chatroom.chatRoomName);
-            }
-
-        }
-
-        public void ChooseChatRoom()
-        {
-            bool onList = false;
-            string inputChatName;
-            Console.WriteLine("Which Chat room would you like to join?");
-            Console.WriteLine("If you would like to create a new Chat Room, please enter the name.");
-            inputChatName = UI.GetInput();
-            foreach (Chatroom chatroom in existingChatrooms)
-            {
-                do
-                {
-                    if (chatroom.chatRoomName.Equals(inputChatName))
-                    {
-                        string userId = client.UserId;
-                        onList = chatroom.CheckIfUserIsInChatRoomList(userId);
-                    }
-                    else
-                    {
-                        Chatroom newChatRoom = new Chatroom(inputChatName);
-                        onList = true;
-                    }
-                }
-                while (onList == false);
-                //enter the chat room
-            }
-        }
-=======
-
->>>>>>> parent of c56a196... formatting
     }
 }
 
