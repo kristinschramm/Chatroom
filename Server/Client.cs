@@ -13,15 +13,17 @@ namespace Server
         TcpClient client;
         public string UserId;
         Queue<Message> messageQueue;
+        List<Client> acceptedClients;
         ILogger logger;
         
-        public Client(NetworkStream Stream, TcpClient Client, int UserCount, Queue<Message> MessageQueue, ILogger Logger)
+        public Client(NetworkStream Stream, TcpClient Client, int UserCount, Queue<Message> MessageQueue, ILogger Logger, List<Client> AcceptedClients)
         {
             stream = Stream;
             client = Client;
             this.UserId = "ChatUser"+(UserCount);
             this.messageQueue = MessageQueue;
             this.logger = Logger;
+            this.acceptedClients = AcceptedClients;
         }
         public void Send(string Message)
         {
@@ -33,14 +35,28 @@ namespace Server
             while (true)
             {
                 byte[] recievedMessage = new byte[256];
-                stream.Read(recievedMessage, 0, recievedMessage.Length);
-                string receivedMessageString = Encoding.ASCII.GetString(recievedMessage);
-                Console.WriteLine(DateTime.Now + " : "+ UserId + " : " + receivedMessageString);
-                logger.Log(DateTime.Now+ " " + UserId +" "+ receivedMessageString);
-                Message message = ConvertInputToMessage(receivedMessageString);
-                lock (messageQueue)
+                try {
+                    stream.Read(recievedMessage, 0, recievedMessage.Length);
+                    string receivedMessageString = Encoding.ASCII.GetString(recievedMessage);
+                    Console.WriteLine(DateTime.Now + " : " + UserId + " : " + receivedMessageString);
+                    logger.Log(DateTime.Now + " " + UserId + " " + receivedMessageString);
+                    Message message = ConvertInputToMessage(receivedMessageString);
+                    lock (messageQueue)
+                    {
+                        messageQueue.Enqueue(message);
+                    }
+                }
+                catch (Exception)
                 {
-                    messageQueue.Enqueue(message);
+                    string disconnectMessageString = "Disconnected";
+                    Console.WriteLine(DateTime.Now + " : " + UserId + " : " + disconnectMessageString);
+                    logger.Log(DateTime.Now + " " + UserId + " " + disconnectMessageString);
+                    Message message = ConvertInputToMessage(disconnectMessageString);
+                   lock (messageQueue)
+                    {
+                        messageQueue.Enqueue(message);
+                    }
+                    acceptedClients.Remove(this);
                 }
             }
         }

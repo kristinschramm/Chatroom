@@ -12,7 +12,8 @@ namespace Server
 {
     class Server
     {
-        Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>();
+        //Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>(); //dictionary doesn't work 
+        List<Client> acceptedClients = new List<Client>();
         
         Queue<Message> messageQueue = new Queue<Message>();
         Client client;
@@ -54,7 +55,7 @@ namespace Server
             Console.WriteLine($"Connected Client {acceptedClients.Count + 1}");
             logger.Log(DateTime.Now + $" Connected Client {acceptedClients.Count + 1}");
             NetworkStream stream = clientSocket.GetStream();
-            client = new Client(stream, clientSocket, (acceptedClients.Count + 1), messageQueue, logger); 
+            client = new Client(stream, clientSocket, (acceptedClients.Count + 1), messageQueue, logger, acceptedClients); 
             AddNewClient(client);
             Thread ReceiveMessageFromClient = new Thread(new ThreadStart(client.Receive));
             ReceiveMessageFromClient.Start();
@@ -79,7 +80,7 @@ namespace Server
         private void Respond(String message)
 
         {
-            foreach (KeyValuePair<int, Client> entry in acceptedClients)
+            foreach (Client client in acceptedClients)
             {
                 client.Send(message);
             }
@@ -88,24 +89,24 @@ namespace Server
 
         private void AddNewClient(Client client)
         {
-            acceptedClients.Add((acceptedClients.Count+1),client);
+            acceptedClients.Add(client);
             Message message = new Message(client, $"{client.UserId} Connected");
             lock (messageQueue)
             {
                 messageQueue.Enqueue(message);
             }            
         }
-        
-        //private void RemoveClient(Client client)
-        //{
 
-        //    Message message = new Message(client, $"{client.UserId} has left the chatroom");
-        //    lock (messageQueue)
-        //    {
-        //        messageQueue.Enqueue(message);
-        //    }
-        //}
+        private void RemoveClient(Client client)
+        {
+            acceptedClients.Remove(client);
+            Message message = new Message(client, $"{client.UserId} has left the chatroom");
+            lock (messageQueue)
+            {
+                messageQueue.Enqueue(message);
+            }
+        }
 
-       
+
     }
 }
