@@ -15,6 +15,7 @@ namespace Client
         TcpClient clientSocket;
         NetworkStream stream;
         public string userName;
+
         public Client(string IP, int port)
         {
             //this.userName=CreateUser();
@@ -29,7 +30,7 @@ namespace Client
             byte[] message = Encoding.ASCII.GetBytes(messageString);
             stream.Write(message, 0, message.Count());
         }
-        public void Recieve()
+        public void Receive()
         {
             byte[] recievedMessage = new byte[256];
             stream.Read(recievedMessage, 0, recievedMessage.Length);
