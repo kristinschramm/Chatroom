@@ -18,12 +18,14 @@ namespace Server
         
         Queue<Message> messageQueue = new Queue<Message>();
         Client client;
+        ILogger logger;
 
         TcpListener server;
-        public Server()
+        public Server(ILogger logger)
         {
             server = new TcpListener(IPAddress.Parse("192.168.0.146"), 9999);
             server.Start();
+            this.logger = logger;
         }
         public void Run()
         {
@@ -40,14 +42,6 @@ namespace Server
                 {
                     DisplayMessage();
                 }
-            },
-            () =>
-            {
-                while (true)
-                {
-                    GetMessageFromClient();
-                }
-
             })
             ;
 
@@ -55,103 +49,62 @@ namespace Server
 
 
         public void AcceptClient()
-        {
-                
+        {                
             TcpClient clientSocket = default(TcpClient);
             clientSocket = server.AcceptTcpClient();
-            Console.WriteLine($"Connected Client");                //this was changed from zip changed from just connected
+            Console.WriteLine($"Connected Client {acceptedClientsList.Count + 1}");
+            logger.Log($"Connected Client {acceptedClientsList.Count + 1}");
             NetworkStream stream = clientSocket.GetStream();
-            client = new Client(stream, clientSocket, acceptedClientsList.Count); //this was changed from zip changed client to clients list
+            client = new Client(stream, clientSocket, acceptedClientsList.Count, messageQueue, logger); 
             AddNewClient(client);
-            
+            Thread ReceiveMessageFromClient = new Thread(new ThreadStart(client.Receive));
+            ReceiveMessageFromClient.Start();
+            client = null;           
                                                                        
         }
         private void DisplayMessage()
         {
             if (messageQueue.Count > 0)
             {
-                Message message = messageQueue.Dequeue();
-                string body = message.Body;
-                string senderName = message.UserId;
-                Respond(senderName + ": " + body);
+                lock (messageQueue)
+                {
+                    Message message = messageQueue.Dequeue();
+                    string body = message.Body;
+                    string senderName = message.UserId;
+                    Respond(senderName + ": " + body);
+                }
             }
+            
         }
 
         private void Respond(String message)
 
-        {
-            
-            Parallel.Invoke(() =>
+        {           
+            foreach (Client client in acceptedClientsList)
             {
-            
-               if (acceptedClientsList.Count > 0)
-               {
-                    acceptedClientsList[0].Send(message);
-               }
-           },
-           () =>
-           {
-               if (acceptedClientsList.Count > 1)
-               {
-                   acceptedClientsList[1].Send(message);
-               }
-           },
-           () =>
-           {
-               if (acceptedClientsList.Count > 2)
-               {
-                   acceptedClientsList[2].Send(message);
-               }
-           })
-           ;
-
+                client.Send(message);
+            }
 
         }
-
 
         private void AddNewClient(Client client)
         {
             acceptedClientsList.Add(client);
             Message message = new Message(client, $"{client.UserId} Connected");
-            messageQueue.Enqueue(message);
-            
-        }
-        public void AddMessageToQueue(Client client)
-        {
-            
-                string body = client.Recieve();
-                Message message = new Message(client, body);
-                messageQueue.Enqueue(message);
-            
-            // rewrite when dictionary get saved
-            //write a parallel loop to continuously check for messages from each person
-        }
-        private void GetMessageFromClient()
-        {
-            Parallel.Invoke(() =>
+            lock (messageQueue)
             {
-
-                if (acceptedClientsList.Count > 0)
-                {
-                    AddMessageToQueue(acceptedClientsList[0]);
-                }
-            },
-           () =>
-           {
-               if (acceptedClientsList.Count > 1)
-               {
-                   AddMessageToQueue(acceptedClientsList[1]);
-               }
-           },
-           () =>
-           {
-               if (acceptedClientsList.Count > 2)
-               {
-                   AddMessageToQueue(acceptedClientsList[2]);
-               }
-           })
-           ;
-
+                messageQueue.Enqueue(message);
+            }            
+        }
+        
+        private void RemoveClient(Client client)
+        {
+            acceptedClientsList.Remove(client);
+            Message message = new Message(client, $"{client.UserId} has left the chatroom");
+            lock (messageQueue)
+            {
+                messageQueue.Enqueue(message);
+            }
         }
 
        

@@ -26,7 +26,7 @@ namespace Client
             {
                while (true)
                {
-                   client.Recieve();
+                   client.Receive();
                }
             });
               
