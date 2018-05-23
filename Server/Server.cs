@@ -13,9 +13,8 @@ namespace Server
 {
     class Server
     {
-       List<Client> acceptedClients = new List<Client>();
-        
-
+        List<Client> acceptedClients = new List<Client>();
+        Dictionary<string, Client> clientDictionary = new Dictionary<string, Client>();
         Queue<Message> messageQueue = new Queue<Message>();
         Client client;
         ILogger logger;
@@ -50,17 +49,21 @@ namespace Server
 
 
         public void AcceptClient()
-        {                
+        {
             TcpClient clientSocket = default(TcpClient);
             clientSocket = server.AcceptTcpClient();
             Console.WriteLine($"Connected Client {acceptedClients.Count + 1}");
             logger.Log(DateTime.Now + $" Connected Client {acceptedClients.Count + 1}");
             NetworkStream stream = clientSocket.GetStream();
-            client = new Client(stream, clientSocket, (acceptedClients.Count + 1), messageQueue, logger, acceptedClients); 
+            client = new Client(stream, clientSocket, (acceptedClients.Count + 1), messageQueue, logger, acceptedClients);
             AddNewClient(client);
+            string clientIP = ((clientSocket.Client.RemoteEndPoint).ToString());
+            Console.WriteLine(clientIP);
+            clientDictionary.Add(clientIP, client);
+            Console.WriteLine(clientDictionary.Count + " " + clientDictionary[clientIP]);
             Thread ReceiveMessageFromClient = new Thread(new ThreadStart(client.Receive));
             ReceiveMessageFromClient.Start();
-            client = null;                                                                          
+            client = null;
 
         }
         private void DisplayMessage()    
