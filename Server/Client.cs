@@ -9,6 +9,7 @@ namespace Server
 {
     class Client
     {
+
         NetworkStream stream;
         TcpClient client;
         public string UserId;
