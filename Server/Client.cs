@@ -27,8 +27,15 @@ namespace Server
         }
         public void Send(string Message)
         {
-            byte[] message = Encoding.ASCII.GetBytes(Message);
-            stream.Write(message, 0, message.Count());
+            try
+            {
+                byte[] message = Encoding.ASCII.GetBytes(Message);
+                stream.Write(message, 0, message.Count());
+            }
+            catch (Exception)
+            {
+                //allows program to continue if client exits
+            }
         }
         public void Receive()
         {
@@ -47,11 +54,10 @@ namespace Server
                     }
                 }
                 catch (Exception)
-                {
-                    string disconnectMessageString = "Disconnected";
-                    Console.WriteLine(DateTime.Now + " : " + UserId + " : " + disconnectMessageString);
-                    logger.Log(DateTime.Now + " " + UserId + " " + disconnectMessageString);
-                    Message message = ConvertInputToMessage(disconnectMessageString);
+                {                    
+                    Console.WriteLine(DateTime.Now + " : " + UserId + " : Disconnected" );
+                    logger.Log(DateTime.Now + " : " + UserId + " : Disconnected");
+                    Message message = ConvertInputToMessage(UserId + " has left the chatroom.");
                    lock (messageQueue)
                     {
                         messageQueue.Enqueue(message);
@@ -65,7 +71,6 @@ namespace Server
             string body = messageBody;
             Message message = new Message(this, body);
             return message;
-            
         }
     }
 }

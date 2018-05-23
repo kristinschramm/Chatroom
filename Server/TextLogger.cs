@@ -26,10 +26,7 @@ namespace Server
                 {
                     streamWriter.WriteLine(DateTime.Now +message);
                 }
-
-            }
-
-            
+            }            
         }
     }
 }

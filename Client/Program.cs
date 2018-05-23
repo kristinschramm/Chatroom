@@ -12,9 +12,6 @@ namespace Client
         static void Main(string[] args)
         {
             Client client = new Client("192.168.0.146", 9999);//this was changed from zip Kristin's IP 8888 specific port
-
-
-
             Parallel.Invoke(() =>
             {
                while (true)
@@ -28,8 +25,7 @@ namespace Client
                {
                    client.Receive();
                }
-            });
-              
+            });              
             Console.ReadLine();
         }
     }

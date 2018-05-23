@@ -44,10 +44,8 @@ namespace Server
                 }
             })
             ;
-
         }
-
-
+        
         public void AcceptClient()
         {                
             TcpClient clientSocket = default(TcpClient);
@@ -59,8 +57,7 @@ namespace Server
             AddNewClient(client);
             Thread ReceiveMessageFromClient = new Thread(new ThreadStart(client.Receive));
             ReceiveMessageFromClient.Start();
-            client = null;           
-                                                                       
+            client = null;                                                                          
         }
         private void DisplayMessage()
         {
@@ -73,18 +70,22 @@ namespace Server
                     string senderName = message.UserId;
                     Respond(senderName + ": " + body);
                 }
-            }
-            
+            }            
         }
 
         private void Respond(String message)
-
         {
-            foreach (Client client in acceptedClients)
+            try
             {
-                client.Send(message);
+                foreach (Client client in acceptedClients)
+                {
+                    client.Send(message);
+                }
             }
-
+            catch (Exception)
+            {
+                //allows program to continue if client exits
+            }
         }
 
         private void AddNewClient(Client client)
@@ -106,7 +107,5 @@ namespace Server
                 messageQueue.Enqueue(message);
             }
         }
-
-
     }
 }
