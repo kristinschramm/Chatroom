@@ -10,7 +10,7 @@ namespace Server
     class TextLogger : ILogger
     {
 
-        public string filePath = @"C:C:\Users\schra\Desktop\DevCodeCamp\C#\Chatroom\Server\ChatLog.txt"; //create text logger with chatroom change name with room name
+        public string filePath = @"C:\Users\schra\Desktop\DevCodeCamp\C#\Chatroom\Server\ChatLog.txt"; //create text logger with chatroom change name with room name
         public void Log(string message)
         {
             if (!File.Exists(filePath))

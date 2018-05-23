@@ -12,9 +12,7 @@ namespace Server
 {
     class Server
     {
-        //Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>();
-        //Dictionary<string, Client> onlineClients = new Dictionary<string, Client>();
-        List<Client> acceptedClientsList = new List<Client>();
+        Dictionary<int, Client> acceptedClients = new Dictionary<int, Client>();
         
         Queue<Message> messageQueue = new Queue<Message>();
         Client client;
@@ -24,8 +22,9 @@ namespace Server
         public Server(ILogger logger)
         {
             server = new TcpListener(IPAddress.Parse("192.168.0.146"), 9999);
-            server.Start();
+            server.Start();            
             this.logger = logger;
+            logger.Log(DateTime.Now + " Server started");
         }
         public void Run()
         {
@@ -52,10 +51,10 @@ namespace Server
         {                
             TcpClient clientSocket = default(TcpClient);
             clientSocket = server.AcceptTcpClient();
-            Console.WriteLine($"Connected Client {acceptedClientsList.Count + 1}");
-            logger.Log($"Connected Client {acceptedClientsList.Count + 1}");
+            Console.WriteLine($"Connected Client {acceptedClients.Count + 1}");
+            logger.Log(DateTime.Now + $" Connected Client {acceptedClients.Count + 1}");
             NetworkStream stream = clientSocket.GetStream();
-            client = new Client(stream, clientSocket, acceptedClientsList.Count, messageQueue, logger); 
+            client = new Client(stream, clientSocket, (acceptedClients.Count + 1), messageQueue, logger); 
             AddNewClient(client);
             Thread ReceiveMessageFromClient = new Thread(new ThreadStart(client.Receive));
             ReceiveMessageFromClient.Start();
@@ -79,8 +78,8 @@ namespace Server
 
         private void Respond(String message)
 
-        {           
-            foreach (Client client in acceptedClientsList)
+        {
+            foreach (KeyValuePair<int, Client> entry in acceptedClients)
             {
                 client.Send(message);
             }
@@ -89,7 +88,7 @@ namespace Server
 
         private void AddNewClient(Client client)
         {
-            acceptedClientsList.Add(client);
+            acceptedClients.Add((acceptedClients.Count+1),client);
             Message message = new Message(client, $"{client.UserId} Connected");
             lock (messageQueue)
             {
@@ -97,15 +96,15 @@ namespace Server
             }            
         }
         
-        private void RemoveClient(Client client)
-        {
-            acceptedClientsList.Remove(client);
-            Message message = new Message(client, $"{client.UserId} has left the chatroom");
-            lock (messageQueue)
-            {
-                messageQueue.Enqueue(message);
-            }
-        }
+        //private void RemoveClient(Client client)
+        //{
+
+        //    Message message = new Message(client, $"{client.UserId} has left the chatroom");
+        //    lock (messageQueue)
+        //    {
+        //        messageQueue.Enqueue(message);
+        //    }
+        //}
 
        
     }

@@ -19,7 +19,7 @@ namespace Server
         {
             stream = Stream;
             client = Client;
-            this.UserId = "ChatUser"+UserCount;
+            this.UserId = "ChatUser"+(UserCount);
             this.messageQueue = MessageQueue;
             this.logger = Logger;
         }
@@ -35,8 +35,8 @@ namespace Server
                 byte[] recievedMessage = new byte[256];
                 stream.Read(recievedMessage, 0, recievedMessage.Length);
                 string receivedMessageString = Encoding.ASCII.GetString(recievedMessage);
-                Console.WriteLine(UserId + receivedMessageString);
-                logger.Log(UserId + receivedMessageString);
+                Console.WriteLine(DateTime.Now + " : "+ UserId + " : " + receivedMessageString);
+                logger.Log(DateTime.Now+ " " + UserId +" "+ receivedMessageString);
                 Message message = ConvertInputToMessage(receivedMessageString);
                 lock (messageQueue)
                 {
