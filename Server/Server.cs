@@ -86,11 +86,13 @@ namespace Server
         private void Respond(String message)
 
         {
-            foreach (Client client in acceptedClients)
+            lock (clientDictionary)
             {
-                client.Send(message);
+                foreach (Client client in acceptedClients)
+                {
+                    client.Send(message);
+                }
             }
-
         }
 
         private void AddNewClient(Client client)
